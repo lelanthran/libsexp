@@ -1,4 +1,4 @@
 one 2
-"three" :four=five (six seven) eight ; and this should be a comment
+"three" (some-symbol :four=five (six seven)) eight ; and this should be a comment
 
 

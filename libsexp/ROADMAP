@@ -1,0 +1,7 @@
+List of things I would like done in the future.
+
+Hooks for supporting evaluation.
+
+
+Disallow NULL expression (at the moment, allowed but ignored)
+
