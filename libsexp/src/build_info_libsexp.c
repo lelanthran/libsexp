@@ -10,7 +10,7 @@ const char *build_info_libsexp_version (void) {
 } 
  
 const char *build_info_libsexp_githash (void) { 
-   return "40b539d238dbda4c1114743e26cbc921ad62af7e"; 
+   return "6a8c9ecdc7bb580786ce3bc3d1b28c74b07ad938"; 
 } 
  
 const char *build_info_libsexp_gitbranch (void) { 
@@ -34,11 +34,11 @@ const char *build_info_libsexp_ccversion (void) {
 } 
  
 const char *build_info_libsexp_build (void) { 
-   return "debug"; 
+   return ""; 
 } 
  
 const char *build_info_libsexp_timestamp (void) { 
-   return "1707420707"; 
+   return "1713125701"; 
 } 
  
 const char *build_info_libsexp_homepage (void) { 
