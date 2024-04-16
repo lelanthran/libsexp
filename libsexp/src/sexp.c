@@ -331,22 +331,65 @@ cleanup:
    return error;
 }
 
-
-
-
-#if 0    // Don't worry about parent, parent must delete child itself
-static size_t sexp_find_child_index (sexp_t *sexp, sexp_t *child)
+struct sexp_info_t *sexp_info (sexp_t *sexp)
 {
-   size_t nchildren = ds_array_length (sexp->children);
-   for (size_t i=0; i<nchildren; i++) {
-      sexp_t *tmp = ds_array_get (sexp->children, i);
-      if (tmp == child) {
-         return i;
-      }
+   if (!sexp)
+      return NULL;
+
+   struct sexp_info_t *ret = malloc (sizeof *ret);
+   if (!ret)
+      return NULL;
+
+   ret->parent = sexp->parent;
+
+   ret->fname = ds_str_dup (sexp->fname);
+   ret->line = sexp->line;
+   ret->cpos = sexp->cpos;
+
+   ret->type = sexp->type;
+   ret->text = ds_str_dup (sexp->text);
+   ret->textlen = sexp->textlen;
+   ret->nattrs = ds_hmap_num_entries(sexp->attrs);
+   ret->nchildren = ds_array_length (sexp->children);
+
+   if (!ret->fname || (sexp->text && !ret->text)) {
+      sexp_info_del (ret);
+      ret = NULL;
    }
-   return (size_t)-1;
+
+   return ret;
 }
-#endif
+
+void sexp_info_dump (struct sexp_info_t *si, FILE *outf)
+{
+   if (!outf)
+      outf = stdout;
+
+   if (!si) {
+      fprintf (stdout, "sexp_info object is NULL\n");
+      return;
+   }
+
+   fprintf (outf, "In [%s:%i:%i], sym[%s] val[%s] (%zu attrs, %zu children)\n",
+                  si->fname,
+                  si->line,
+                  si->cpos,
+                  sexp_type_name (si->type),
+                  si->text,
+                  si->nattrs,
+                  si->nchildren);
+}
+
+void sexp_info_del (struct sexp_info_t *si)
+{
+   if (!si)
+      return;
+
+   free (si->fname);
+   free (si->text);
+   free (si);
+}
+
 
 void sexp_del (sexp_t *sexp)
 {
@@ -354,15 +397,7 @@ void sexp_del (sexp_t *sexp)
       return;
    }
 
-#if 0    // Don't worry about parent, parent must delete child itself
-   if (sexp->parent) {
-      size_t my_index = sexp_find_child_index (sexp->parent, sexp);
-      if (my_index != (size_t)-1) {
-         ds_array_rm (sexp->parent->children, my_index);
-      }
-   }
-#endif
-
+   // Note: no unlinking from parent - caller must do that.
    free (sexp->fname);
    free (sexp->text);
 

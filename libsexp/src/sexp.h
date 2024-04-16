@@ -25,6 +25,20 @@ enum sexp_err_t {
    sexp_err_LIST_TERMINATOR,
 };
 
+struct sexp_info_t {
+   sexp_t *parent;
+
+   char *fname;
+   int line;
+   int cpos;
+
+   enum sexp_type_t type;
+   char *text;
+   size_t textlen;
+
+   size_t nattrs;
+   size_t nchildren;
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +49,10 @@ extern "C" {
                               char **input);
 
    void sexp_del (sexp_t *sexp);
+
+   struct sexp_info_t *sexp_info (sexp_t *sexp);
+   void sexp_info_dump (struct sexp_info_t *si, FILE *outf);
+   void sexp_info_del (struct sexp_info_t *si);
 
    bool sexp_get_attrs (sexp_t *sexp, char ***keys, char ***values);
 

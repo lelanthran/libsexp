@@ -1,4 +1,10 @@
 one 2
 "three" (some-symbol :four=five (six seven)) eight ; and this should be a comment
 
+(html
+ (body :onload="MyFunc"
+  (h1 :class=MyClass)
+  (p This is a paragraph of symbols)
+  (p "This is a literal paragraph")))
+
 

@@ -1,7 +1,9 @@
 List of things I would like done in the future.
 
-Hooks for supporting evaluation.
+Values for attributes must either be forced to be quoted or intelligently decide
+if quotes must be discarded.
 
+Hooks for supporting evaluation.
 
 Disallow NULL expression (at the moment, allowed but ignored)
 

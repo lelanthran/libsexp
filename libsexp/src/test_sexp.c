@@ -80,6 +80,15 @@ int main (void)
    enum sexp_err_t error;
    while ((error = (sexp_next (&sexp, NULL, fname, &line, &cpos, &tmp))) == sexp_err_OK) {
       sexp_dump (sexp, NULL, 0);
+      if (sexp) {
+         struct sexp_info_t *si = sexp_info (sexp);
+         if (!si) {
+            printf ("%p: Failed to get information - OOM?\n", sexp);
+            *(char *)0 = 0;
+         }
+         sexp_info_dump (si, NULL);
+         sexp_info_del (si);
+      }
       sexp_del (sexp);
    }
    printf ("Last error: %s\n", sexp_error_name (error));
