@@ -1,9 +1,63 @@
 List of things I would like done in the future.
 
+
+====================================================================================
 Values for attributes must either be forced to be quoted or intelligently decide
 if quotes must be discarded.
 
-Hooks for supporting evaluation.
 
-Disallow NULL expression (at the moment, allowed but ignored)
+====================================================================================
+Hooks for supporting evaluation:
+1. Try to design something that can be easily used from Python or cgo.
+2. Callbacks are easiest but not usable from other languages easily.
 
+
+====================================================================================
+Filtering and traversal is easy, but that results in a flattened tree void of
+structure (filtering => a list of objects matching predicate, traversal => each
+object called without context of where in the tree it is).
+
+What I want is that, given a complex tree, the caller should be able to specify that
+(for example) the following tree must generate the correct back-end and front-end
+code for the endpoint (regardless of language - a specific framework must support
+this):
+```
+(namespace "MyApplication")
+
+(endpoint MyEndPoint1
+   (accepts (route :acl="all" some/relative/path1)
+            (Parameters
+               (Integer iField)
+               (String sField)
+               (Array (String sFields))))
+   (returns (Parameters
+               (Integer errCode)
+               (String errMessage))))
+
+(endpoint MyEndPoint2
+   (description
+      "This is a freeform description composed of multiple
+       lines. This line is preserved verbatim, including leading
+       spaces due to indentation in the source."
+   (accepts (route :acl="user,sysad" some/relative/path2)
+            (Parameters
+               (String sField)
+               (String sField1))))
+   (returns (Parameters
+               (Integer errCode)
+               (String errMessage))))
+```
+
+Maybe a function with the prototype:
+   `sexp_t *find_direct_child (const char *symbol)`
+can be used by the caller to first grab all `endpoint` trees, then for each, use the
+first `accepts` tree, the first `returns` tree, etc.
+
+This allows locating the correct subtrees, but it doesn't help with decoding each
+child in turn (for example, getting `Parameters` and generating the serialisation
+code for each parameter).
+
+Would also need a function with the prototype:
+   `bool sexp_children (sexp_t **dst ,size_t *dst_len)`
+to allow iterating across children. The existing `sexp_info` function can retrieve
+the symbol name in a safe manner.
