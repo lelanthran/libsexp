@@ -20,7 +20,7 @@ object called without context of where in the tree it is).
 What I want is that, given a complex tree, the caller should be able to specify that
 (for example) the following tree must generate the correct back-end and front-end
 code for the endpoint (regardless of language - a specific framework must support
-this):
+this, much like OpenAI but without the insanity of formatting).
 ```
 (namespace "MyApplication")
 
@@ -61,3 +61,86 @@ Would also need a function with the prototype:
    `bool sexp_children (sexp_t **dst ,size_t *dst_len)`
 to allow iterating across children. The existing `sexp_info` function can retrieve
 the symbol name in a safe manner.
+
+The problem with making the caller search for items of interest (which it then
+operates on) is that there won't be any errors generated for unknown elements.
+
+Probably best to force caller into child-iteration, then caller can match each
+`first (node)` with expected types and error out on a match failure.
+
+```
+switch (get_symbol_type (sexp->text)) {
+   case ENDPOINT:  codegen_endpoint (sexp);
+}
+
+// In codegen_endpoint ()
+switch (get_symbol_type (children[i]->text)) {
+   case DESCRIPTION: ret->description = children[i]->text;
+   case ACCEPTS:     ret->accepts = accepts_new (children[i]);
+   case RETURNS:     ret->returns = returns_new (children[i]);
+}
+```
+
+
+====================================================================================
+For codegen, maybe better to allow more complete codegen, using the s-expressions
+themselves to generate the data class/record/structur. Note: this will take more
+work and is more complicated.
+
+```
+(class Endpoint
+   (String description)
+   (class Accepts
+      (class Route (Attributes acl "user", "operator", "admin")
+                   (String route))
+      (class Parameters
+         (String name)
+         (String type)))
+   (class Returns
+      (class Parameters
+         (String name)
+         (String type))))
+```
+
+Which must generate the following:
+```
+struct Endpoint{
+   char *description;
+   struct Accepts_t {
+      struct Route_t {
+         enum acl_t {
+            acl_user,
+            acl_operator,
+            acl_admin,
+         } acl;
+         char *route;
+      } Route;
+      struct Parameters_t {
+         char *name;
+         char *type;
+      } Parameters;
+   } Accepts;
+   struct Returns_t {
+      struct Parameters_t {
+         char *name;
+         char *type;
+      } Parameters;
+   } Returns;
+};
+```
+
+Then we can simply use it like so:
+
+```
+
+(endpoint MyEndPoint1
+   (accepts (route :acl="all" some/relative/path1)
+            (Parameters
+               (Integer iField)
+               (String sField)
+               (Array (String sFields))))
+   (returns (Parameters
+               (Integer errCode)
+               (String errMessage))))
+
+```
